@@ -1,5 +1,5 @@
-shooting <- readRDS("data/shooting.16.17.rds")
-players <- levels(factor(shooting$Player))
+shooting <- readRDS("data/shooting.16.18.rds")
+players <- levels(factor(shooting$Player.x))
 
 shinyUI(fluidPage(
     titlePanel("Player Shot Profile"),
