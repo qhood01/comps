@@ -39,7 +39,7 @@ player_yoy <- function(player) {
     adv.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,cols.17.18])
     adv <- t(data.frame(adv.16.17,adv.17.18))
     adv[,c(1,3,4)] <- 100*adv[,c(1,3,4)]
-
+    adv[is.na(adv)] <- 0
     colnames(adv) <- c("TS%","USG%","FTR","FT%")
     barplot(adv, col=c('#e41a1c','#377eb8'), beside=TRUE,
             ylab="")
@@ -51,6 +51,7 @@ player_yoy <- function(player) {
     s.perc <- t(data.frame(s.perc.16.17,s.perc.17.18))
     pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
     pps <- pps
+    pps[is.na(pps)] <- 0
     colnames(pps) <- c("0-3","3-10","10-16","16<3","3")
     barplot(pps, col=c('#e41a1c','#377eb8'), beside=TRUE,
             ylab="Points Per Shot", xlab="Shot Distance")
@@ -61,7 +62,7 @@ player_yoy <- function(player) {
     perc.s.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,11:15])
     perc.s.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,31:35])
     perc.s <- t(data.frame(perc.s.16.17,perc.s.17.18))*100
-
+    perc.s[is.na(perc.s)] <- 0
     colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
     barplot(perc.s, col=c('#e41a1c','#377eb8'), beside=TRUE,
             ylab="Percent Of All Shots",
