@@ -44,7 +44,6 @@ player_yoy <- function(player) {
     bp <- barplot(adv, col=c('#e41a1c','#377eb8'), beside=TRUE,
             ylab="")
     mtext("Advanced Stats",side=3,line=1)
-    text(bp,
     box()
     league.pps <- 1.028
     s.perc.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,16:20])
