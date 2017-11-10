@@ -44,13 +44,8 @@ player_yoy <- function(player) {
     ylim <- max(adv)*1.1
     bp <- barplot(adv, col=c('#e41a1c','#377eb8'), beside=TRUE,
                   ylab="", ylim=c(0,ylim), cex.axis=1.5, cex.names=1.5, font=2)
-
-    bp2 <- barplot(adv-5, col=c('white','white'), beside=TRUE,
-                  ylab="", ylim=c(0,ylim), cex.axis=1.5, cex.names=1.5, font=2, add=TRUE)
-    print(adv)
-    print(adv-5)
-    text(x=bp,y=adv,labels=adv,pos=3,font=2,cex=1.5)
-    mtext("Advanced Stats",side=3,line=1,cex=1.5,font=2)
+    text(x=bp,y=adv,labels=adv,pos=3,cex=1.5)
+    mtext("Advanced Stats",side=3,line=1,cex=1.5)
     box()
     league.pps <- 1.028
     s.perc.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,16:20])
@@ -62,9 +57,9 @@ player_yoy <- function(player) {
     colnames(pps) <- c("0-3","3-10","10-16","16<3","3")
     barplot(pps, col=c('#e41a1c','#377eb8'), beside=TRUE,
             cex.axis=1.5, cex.names=1.5, font=2)
-    mtext("Shot Distance",side=1,line=3,font=2)
-    mtext("Points Per Shot",side=2,line=3,font=2)
-    mtext("Points Per Shot by Location",side=3,line=1,cex=1.5,font=2)
+    mtext("Shot Distance",side=1,line=3)
+    mtext("Points Per Shot",side=2,line=3)
+    mtext("Points Per Shot by Location",side=3,line=1,cex=1.5)
     mtext(player,side=3,line=4,cex=2,font=2)
     abline(h=1.028,col='Black',lty=2,lwd=2)
     box()
@@ -75,9 +70,9 @@ player_yoy <- function(player) {
     colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
     barplot(perc.s, col=c('#e41a1c','#377eb8'), beside=TRUE,
             cex.axis=1.5, cex.names=1.5, font=2)
-    mtext("Shot Distance",side=1,line=3,font=2)
-    mtext("Percent of Shots",side=2,line=3,font=2)
-    mtext("Percent of Shots by Location",side=3,line=1,cex=1.5,font=2)
+    mtext("Shot Distance",side=1,line=3)
+    mtext("Percent of Shots",side=2,line=3)
+    mtext("Percent of Shots by Location",side=3,line=1,cex=1.5)
     box()
     par(mai=c(0,0,0,0))
     plot.new()
