@@ -33,7 +33,6 @@ player.urls.17.18 <- paste0("https://www.basketball-reference.com/players/",
 
 
 # 2017-18
-rm(locations.df.17.18)
 for (url in player.urls.17.18) {
     print(url)
     h <- read_html(url)
@@ -43,28 +42,33 @@ for (url in player.urls.17.18) {
         read_html() %>%    # reparse to HTML
         html_node('table#totals') %>%    # select the desired table
         html_table()
-    advanced <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
-        html_text() %>%    # extract comment text
-        paste(collapse = '') %>%    # collapse to a single string
-        read_html() %>%    # reparse to HTML
-        html_node('table#advanced') %>%    # select the desired table
-        html_table()
-    shooting <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
-        html_text() %>%    # extract comment text
-        paste(collapse = '') %>%    # collapse to a single string
-        read_html() %>%    # reparse to HTML
-        html_node('table#shooting') %>%    # select the desired table
-        html_table()
-    ftp.17.18.games.minutes <- totals[totals$Season == "2017-18",c("G","MP","FT%")][1,]
-    ftr.17.18 <- advanced[advanced$Season == "2017-18",c("FTr")][1]
-    shooting.17.18 <- shooting[shooting[,1] == "2017-18",c(11:15,17:21)][1,]
-    colnames(shooting.17.18) <- c("perc.0.3","perc.3.10","perc.10.16","perc.16.3","perc.3",
-                                  "0.3.perc","3.10.perc","10.16.perc","16.3.perc","3.perc")
-    stats <- cbind(url,ftp.17.18.games.minutes,ftr.17.18,shooting.17.18)
-    if(!exists("locations.df.17.18")) {
-        locations.df.17.18 <- stats
+    shots <- totals[totals$Season == "2017-18",c("FGA")][1]
+    if (shots > 0) {
+        advanced <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
+            html_text() %>%    # extract comment text
+            paste(collapse = '') %>%    # collapse to a single string
+            read_html() %>%    # reparse to HTML
+            html_node('table#advanced') %>%    # select the desired table
+             html_table()
+        shooting <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
+            html_text() %>%    # extract comment text
+            paste(collapse = '') %>%    # collapse to a single string
+            read_html() %>%    # reparse to HTML
+            html_node('table#shooting') %>%    # select the desired table
+            html_table()
+        ftp.17.18.games.minutes <- totals[totals$Season == "2017-18",c("G","MP","FT%")][1,]
+        ftr.17.18 <- advanced[advanced$Season == "2017-18",c("FTr")][1]
+        shooting.17.18 <- shooting[shooting[,1] == "2017-18",c(11:15,17:21)][1,]
+        colnames(shooting.17.18) <- c("perc.0.3","perc.3.10","perc.10.16","perc.16.3","perc.3",
+                                      "0.3.perc","3.10.perc","10.16.perc","16.3.perc","3.perc")
+        stats <- cbind(url,ftp.17.18.games.minutes,ftr.17.18,shooting.17.18)
+        if(!exists("locations.df.17.18")) {
+            locations.df.17.18 <- stats
+        } else {
+            locations.df.17.18 <- rbind(locations.df.17.18,stats)
+        }
     } else {
-        locations.df.17.18 <- rbind(locations.df.17.18,stats)
+        next
     }
 }
 
