@@ -16,5 +16,11 @@ bootstrapPage(
     fluidRow(
         column(12, align="center",
                plotOutput("graph",width="85%"))
+    ),
+    fluidRow(
+        column(12, align="center",
+               a(href="https://www.basketball-reference.com/",
+                 "Data Source: Basketball Reference",target="_blank"))
     )
+
 )
