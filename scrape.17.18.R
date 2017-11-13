@@ -43,7 +43,7 @@ for (url in player.urls.17.18) {
         html_node('table#totals') %>%    # select the desired table
         html_table()
     shots <- totals[totals$Season == "2017-18",c("FGA")][1]
-    if (shots > 0) {
+    if (shots > 10 | is.na(shots)) {
         advanced <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
             html_text() %>%    # extract comment text
             paste(collapse = '') %>%    # collapse to a single string
