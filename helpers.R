@@ -1,34 +1,8 @@
 stats.df.16.18 <- readRDS("data/shooting.16.18.rds")
 stats.df.16.18[is.na(stats.df.16.18)] <- 0
-
-plot_player <- function(player) {
-    layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(7, 1))
-    par(mai=c(0.5,1.0,1.5,0.5))
-    league.pps <- 1.028
-    position <- df[df$Player == player,"Pos"]
-    p.s.perc <- as.numeric(df[df$Player == player,16:20])
-    m.s.perc <- as.numeric(pos.medians[pos.medians$Position == position,10:14])
-    s.perc <- t(data.frame(p.s.perc,m.s.perc))
-    pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
-    colnames(pps) <- c("0-3","3-10","10-16","16<3","3")
-    barplot(pps, col=c('#e41a1c','#377eb8'), beside=TRUE, main="Points Per Shot By Location",
-            ylab="Points Per Shot")
-    abline(h=1.028,col='Black',lty=2,lwd=2)
-    box()
-    p.perc.s <- as.numeric(df[df$Player == player,11:15])
-    m.perc.s <- as.numeric(pos.medians[pos.medians$Position == position,5:9])
-    perc.s <- t(data.frame(p.perc.s,m.perc.s))*100
-    colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
-    barplot(perc.s, col=c('#e41a1c','#377eb8'), beside=TRUE,
-            main="Proportion Of Shots By Location", ylab="Percent Of All Shots")
-    mtext(player, side=3, outer=TRUE, line=-3, cex=2)
-    box()
-    par(mai=c(0,0,0,0))
-    plot.new()
-    legend(x="center", ncol=3, legend=c(player, paste0(position, " Median"),
-                                        "League Average PPS"),
-           col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,2), lwd=c(4,4,2))
-}
+cols <- c(2,8,28,4,24,5,25,43,44)
+names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
+           "USG 16-17", "USG 17-18", "TS Change", "USG Change")
 
 player_yoy <- function(player) {
     layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
@@ -79,4 +53,43 @@ player_yoy <- function(player) {
     legend(x="center", ncol=3, legend=c("2016-17", "2017-18",
                                         "League Average PPS"),
            col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,3), lwd=c(7,7,7), cex=2)
+}
+
+display <- function() {
+    df <- stats.df.16.18[,cols]
+    names(df) <- names
+    df[,4] <- as.numeric(df[,4])
+    df[,5] <- as.numeric(df[,5])
+    df[,8] <- as.numeric(df[,8])
+    df[,c(4,5,8)] <- 100*df[,c(4,5,8)]
+    return(df)
+}
+
+plot_player <- function(player) {
+    layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(7, 1))
+    par(mai=c(0.5,1.0,1.5,0.5))
+    league.pps <- .516*2
+    position <- df[df$Player == player,"Pos"]
+    p.s.perc <- as.numeric(df[df$Player == player,16:20])
+    m.s.perc <- as.numeric(pos.medians[pos.medians$Position == position,10:14])
+    s.perc <- t(data.frame(p.s.perc,m.s.perc))
+    pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
+    colnames(pps) <- c("0-3","3-10","10-16","16<3","3")
+    barplot(pps, col=c('#e41a1c','#377eb8'), beside=TRUE, main="Points Per Shot By Location",
+            ylab="Points Per Shot")
+    abline(h=1.028,col='Black',lty=2,lwd=2)
+    box()
+    p.perc.s <- as.numeric(df[df$Player == player,11:15])
+    m.perc.s <- as.numeric(pos.medians[pos.medians$Position == position,5:9])
+    perc.s <- t(data.frame(p.perc.s,m.perc.s))*100
+    colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
+    barplot(perc.s, col=c('#e41a1c','#377eb8'), beside=TRUE,
+            main="Proportion Of Shots By Location", ylab="Percent Of All Shots")
+    mtext(player, side=3, outer=TRUE, line=-3, cex=2)
+    box()
+    par(mai=c(0,0,0,0))
+    plot.new()
+    legend(x="center", ncol=3, legend=c(player, paste0(position, " Median"),
+                                        "League Average PPS"),
+           col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,2), lwd=c(4,4,2))
 }

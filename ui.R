@@ -1,5 +1,6 @@
 shooting <- readRDS("data/shooting.16.18.rds")
 players <- levels(factor(shooting$Player.x))
+vars <- names(shooting)
 
 bootstrapPage(
     fluidRow(
@@ -21,6 +22,10 @@ bootstrapPage(
         column(12, align="center",
                a(href="https://www.basketball-reference.com/",
                  "Data Source: Basketball Reference",target="_blank"))
+    ),
+    fluidRow(
+        column(12, align="center",
+               dataTableOutput("table"))
     )
 
 )
