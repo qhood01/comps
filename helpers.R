@@ -51,7 +51,7 @@ player_yoy <- function(player) {
     par(mai=c(0,0,0,0))
     plot.new()
     legend(x="center", ncol=3, legend=c("2016-17", "2017-18",
-                                        "League Average PPS"),
+                                        "Average PPS from the Field"),
            col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,3), lwd=c(7,7,7), cex=2)
 }
 
@@ -90,6 +90,6 @@ plot_player <- function(player) {
     par(mai=c(0,0,0,0))
     plot.new()
     legend(x="center", ncol=3, legend=c(player, paste0(position, " Median"),
-                                        "League Average PPS"),
+                                        "Average PPS from the Field"),
            col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,2), lwd=c(4,4,2))
 }

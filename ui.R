@@ -1,6 +1,7 @@
 shooting <- readRDS("data/shooting.16.18.rds")
 players <- levels(factor(shooting$Player.x))
 vars <- names(shooting)
+time <- format(file.mtime("data/shooting.16.18.rds"),"%b %d, %Y %H:%M")
 
 bootstrapPage(
     fluidRow(
@@ -22,6 +23,10 @@ bootstrapPage(
         column(12, align="center",
                a(href="https://www.basketball-reference.com/",
                  "Data Source: Basketball Reference",target="_blank"))
+    ),
+    fluidRow(
+        column(12, align="center",
+               h5(paste0("Last Updated ",time)))
     ),
     fluidRow(
         column(12, align="center",
