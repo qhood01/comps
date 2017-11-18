@@ -84,7 +84,7 @@ for (i in c(3:4,7:20)) {
 }
 
 # Merge years
-stats.df.16.18 <- merge(stats.df.16.17,stats.df.17.18,by="player.id")
+stats.df.16.18 <- merge(stats.df.16.17,stats.df.17.18,by="player.id",all.y=TRUE)
 
 stats.df.16.18$inc.ts.usg <- ifelse((stats.df.16.18$TS..y > stats.df.16.18$TS..x) &
                                     (stats.df.16.18$USG..y > stats.df.16.18$USG..x),1,0)

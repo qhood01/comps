@@ -1,6 +1,5 @@
 shooting <- readRDS("data/shooting.16.18.rds")
-players <- levels(factor(shooting$Player.x))
-vars <- names(shooting)
+players <- levels(factor(shooting$Player.y))
 time <- format(file.mtime("data/shooting.16.18.rds"),"%b %d, %Y %H:%M",tz="EST")
 
 bootstrapPage(

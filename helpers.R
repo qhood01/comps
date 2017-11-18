@@ -1,6 +1,6 @@
 stats.df.16.18 <- readRDS("data/shooting.16.18.rds")
 stats.df.16.18[is.na(stats.df.16.18)] <- 0
-cols <- c(2,8,28,4,24,5,25,43,44)
+cols <- c(22,8,28,4,24,5,25,43,44)
 names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
            "USG 16-17", "USG 17-18", "TS Change", "USG Change")
 
@@ -9,8 +9,8 @@ player_yoy <- function(player) {
     par(mai=c(0.5,0.5,1.0,0.25))
     cols.16.17 <- c(4,5,10,9)
     cols.17.18 <- c(24,25,30,29)
-    adv.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,cols.16.17])
-    adv.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,cols.17.18])
+    adv.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.16.17])
+    adv.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.17.18])
     adv <- t(data.frame(adv.16.17,adv.17.18))
     adv[,c(1,3,4)] <- 100*adv[,c(1,3,4)]
     adv[is.na(adv)] <- 0
@@ -22,8 +22,8 @@ player_yoy <- function(player) {
     mtext("Advanced Stats",side=3,line=1,cex=1.5)
     box()
     league.pps <- 1.028
-    s.perc.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,16:20])
-    s.perc.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,36:40])
+    s.perc.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,16:20])
+    s.perc.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,36:40])
     s.perc <- t(data.frame(s.perc.16.17,s.perc.17.18))
     pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
     pps <- pps
@@ -37,8 +37,8 @@ player_yoy <- function(player) {
     mtext(player,side=3,line=4,cex=2,font=2)
     abline(h=1.028,col='Black',lty=2,lwd=2)
     box()
-    perc.s.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,11:15])
-    perc.s.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.x == player,31:35])
+    perc.s.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,11:15])
+    perc.s.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,31:35])
     perc.s <- t(data.frame(perc.s.16.17,perc.s.17.18))*100
     perc.s[is.na(perc.s)] <- 0
     colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
