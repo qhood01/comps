@@ -1,17 +1,30 @@
 stats.df.16.18 <- readRDS("data/shooting.16.18.rds")
+league.average.17.18 <- readRDS("data/league.average.17.18.rds")
+adv.average.17.18 <- readRDS("data/adv.average.17.18.rds")
 stats.df.16.18[is.na(stats.df.16.18)] <- 0
 cols <- c(22,8,28,4,24,5,25,43,44)
 names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
            "USG 16-17", "USG 17-18", "TS Change", "USG Change")
 
-player_yoy <- function(player) {
+player_yoy <- function(player,ref="self") {
     layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
     par(mai=c(0.5,0.5,1.0,0.25))
     cols.16.17 <- c(4,5,10,9)
     cols.17.18 <- c(24,25,30,29)
-    adv.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.16.17])
-    adv.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.17.18])
-    adv <- t(data.frame(adv.16.17,adv.17.18))
+    if (ref == "self") {
+        adv.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.16.17])
+        s.perc.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,16:20])
+        perc.s.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,11:15])
+        leg <- c("2016-17", "2017-18", "Average PPS from the Field")
+    } else {
+        adv.1 <- adv.average.17.18
+        s.perc.1 <- as.numeric(league.average.17.18[1,])
+        perc.s.1 <- as.numeric(league.average.17.18[2,])
+        leg <- c("2017-18 League Avg.", paste0("2017-18 ", player),
+                 "Average PPS from the Field")
+    }
+    adv.2 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.17.18])
+    adv <- t(data.frame(adv.1,adv.2))
     adv[,c(1,3,4)] <- 100*adv[,c(1,3,4)]
     adv[is.na(adv)] <- 0
     colnames(adv) <- c("TS%","USG%","FTR","FT%")
@@ -22,9 +35,8 @@ player_yoy <- function(player) {
     mtext("Advanced Stats",side=3,line=1,cex=1.5)
     box()
     league.pps <- 1.028
-    s.perc.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,16:20])
-    s.perc.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,36:40])
-    s.perc <- t(data.frame(s.perc.16.17,s.perc.17.18))
+    s.perc.2 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,36:40])
+    s.perc <- t(data.frame(s.perc.1,s.perc.2))
     pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
     pps <- pps
     pps[is.na(pps)] <- 0
@@ -37,9 +49,8 @@ player_yoy <- function(player) {
     mtext(player,side=3,line=4,cex=2,font=2)
     abline(h=1.028,col='Black',lty=2,lwd=2)
     box()
-    perc.s.16.17 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,11:15])
-    perc.s.17.18 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,31:35])
-    perc.s <- t(data.frame(perc.s.16.17,perc.s.17.18))*100
+    perc.s.2 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,31:35])
+    perc.s <- t(data.frame(perc.s.1,perc.s.2))*100
     perc.s[is.na(perc.s)] <- 0
     colnames(perc.s) <- c("0-3","3-10","10-16","16<3","3")
     barplot(perc.s, col=c('#e41a1c','#377eb8'), beside=TRUE,
@@ -50,8 +61,7 @@ player_yoy <- function(player) {
     box()
     par(mai=c(0,0,0,0))
     plot.new()
-    legend(x="center", ncol=3, legend=c("2016-17", "2017-18",
-                                        "Average PPS from the Field"),
+    legend(x="center", ncol=3, legend=leg,
            col=c('#e41a1c','#377eb8',"Black"), lty=c(1,1,3), lwd=c(7,7,7), cex=2)
 }
 

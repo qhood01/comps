@@ -16,6 +16,12 @@ bootstrapPage(
     ),
     fluidRow(
         column(12, align="center",
+               radioButtons("var2",
+                            label="Choose a reference",
+                            choices = c("League Average","Player's Previous Year")))
+    ),
+    fluidRow(
+        column(12, align="center",
                plotOutput("graph",width="85%"))
     ),
     fluidRow(
