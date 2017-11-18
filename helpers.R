@@ -1,7 +1,7 @@
+print("test1")
 stats.df.16.18 <- readRDS("data/shooting.16.18.rds")
 league.average.17.18 <- readRDS("data/league.average.17.18.rds")
 adv.average.17.18 <- readRDS("data/adv.average.17.18.rds")
-stats.df.16.18[is.na(stats.df.16.18)] <- 0
 cols <- c(22,8,28,4,24,5,25,43,44)
 names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
            "USG 16-17", "USG 17-18", "TS Change", "USG Change")
