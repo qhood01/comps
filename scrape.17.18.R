@@ -116,21 +116,21 @@ rownames(league.perc) <- c("s.perc","perc.s")
 
 saveRDS(league.perc, "./data/league.average.17.18.rds")
 
-league.misc <- webpage.league.shooting %>%
+league.misc <- webpage.league %>%
                    html_nodes(xpath = '//comment()') %>%    # select comment nodes
                    html_text() %>%    # extract comment text
                    paste(collapse = '') %>%    # collapse to a single string
                    read_html() %>%    # reparse to HTML
                    html_node('table#misc_stats') %>%    # select the desired table
                    html_table()
-league.totals <- webpage.league.shooting %>%
+league.totals <- webpage.league %>%
                    html_nodes(xpath = '//comment()') %>%    # select comment nodes
                    html_text() %>%    # extract comment text
                    paste(collapse = '') %>%    # collapse to a single string
                    read_html() %>%    # reparse to HTML
                    html_node('table#team-stats-base') %>%    # select the desired table
                    html_table()
-league.adv <- c(as.numeric(league.misc[32,16]),.2,as.numeric(league.misc[32,14]),
+league.adv <- c(as.numeric(league.misc[32,16]),20,as.numeric(league.misc[32,14]),
                 as.numeric(league.totals[31,"FT%"]))
 
-saveRDS(league.perc, "./data/adv.average.17.18.rds")
+saveRDS(league.adv, "./data/adv.average.17.18.rds")
