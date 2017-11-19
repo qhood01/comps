@@ -46,7 +46,7 @@ player_yoy <- function(player,ref="self") {
     text(x=bp,y=pps,labels=round(s.perc*100,1),pos=3,cex=1.4)
     mtext("Shot Distance",side=1,line=3)
     mtext("Points Per Shot",side=2,line=3)
-    mtext("Points Per Shot by Location",side=3,line=1)
+    mtext("Points Per Shot by Location",side=3,line=1,cex=1.5)
     mtext(player,side=3,line=4,cex=2,font=2)
     #abline(h=1.028,col='Black',lty=2,lwd=2)
     box()
