@@ -1,0 +1,3 @@
+library("jsonlite")
+
+isolation.url <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2017&seasonType=Reg"
