@@ -132,6 +132,9 @@ for (p in play.types) {
 all.plays.2016[is.na(all.plays.2016)] <- 0
 all.plays.2017[is.na(all.plays.2017)] <- 0
 
+saveRDS(all.plays.2016,"./Data/plays.2016.rds")
+saveRDS(all.plays.2017,"./Data/plays.2017.rds")
+
 plot_plays <- function(name) {
     layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(6, 1))
     par(mai=c(0.5,0.5,1.0,0.25))
@@ -144,7 +147,8 @@ plot_plays <- function(name) {
     perc <- perc[,order]
     perc[1,] <- as.numeric(perc[1,])
     perc[2,] <- as.numeric(perc[2,])
-    barplot(perc[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+    barplot(perc[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
     box()
     ppp <- rbind("2016"=as.numeric(stats.16[,grepl("PPP",names(stats.16))]),
                   "2017"=as.numeric(stats.17[,grepl("PPP",names(stats.17))]))
@@ -152,7 +156,8 @@ plot_plays <- function(name) {
     ppp <- ppp[,order]
     ppp[1,] <- as.numeric(ppp[1,])
     ppp[2,] <- as.numeric(ppp[2,])
-    barplot(ppp[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+    barplot(ppp[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
     box()
     par(mai=c(0,0,0,0))
     plot.new()
@@ -172,7 +177,8 @@ compare_players <- function(name1,name2) {
     perc[1,] <- as.numeric(perc[1,])
     perc[2,] <- as.numeric(perc[2,])
     barplot(perc[,perc[1,]>5|perc[2,]>5],
-            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),main=name1)
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
     box()
     ppp <- rbind(as.numeric(stats.1[,grepl("PPP",names(stats.1))]),
                  as.numeric(stats.2[,grepl("PPP",names(stats.2))]))
@@ -181,7 +187,8 @@ compare_players <- function(name1,name2) {
     ppp[1,] <- as.numeric(ppp[1,])
     ppp[2,] <- as.numeric(ppp[2,])
     barplot(ppp[,perc[1,]>5|perc[2,]>5],
-            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),main=name2)
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
     box()
     par(mai=c(0,0,0,0))
     plot.new()

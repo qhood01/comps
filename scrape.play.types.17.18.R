@@ -141,16 +141,20 @@ plot_plays <- function(name) {
                   "2017"=as.numeric(stats.17[,grepl("Time",names(stats.17))]))
     colnames(perc) <- play.types
     order <- names(sort(perc[2,],decreasing=TRUE))
+    perc <- perc[,order]
     perc[1,] <- as.numeric(perc[1,])
     perc[2,] <- as.numeric(perc[2,])
-    barplot(perc[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+    barplot(perc[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
     box()
     ppp <- rbind("2016"=as.numeric(stats.16[,grepl("PPP",names(stats.16))]),
                   "2017"=as.numeric(stats.17[,grepl("PPP",names(stats.17))]))
     colnames(ppp) <- play.types
+    ppp <- ppp[,order]
     ppp[1,] <- as.numeric(ppp[1,])
     ppp[2,] <- as.numeric(ppp[2,])
-    barplot(ppp[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+    barplot(ppp[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
     box()
     par(mai=c(0,0,0,0))
     plot.new()
@@ -170,7 +174,8 @@ compare_players <- function(name1,name2) {
     perc[1,] <- as.numeric(perc[1,])
     perc[2,] <- as.numeric(perc[2,])
     barplot(perc[,perc[1,]>5|perc[2,]>5],
-            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
     box()
     ppp <- rbind(as.numeric(stats.1[,grepl("PPP",names(stats.1))]),
                  as.numeric(stats.2[,grepl("PPP",names(stats.2))]))
@@ -179,7 +184,8 @@ compare_players <- function(name1,name2) {
     ppp[1,] <- as.numeric(ppp[1,])
     ppp[2,] <- as.numeric(ppp[2,])
     barplot(ppp[,perc[1,]>5|perc[2,]>5],
-            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'))
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
     box()
     par(mai=c(0,0,0,0))
     plot.new()

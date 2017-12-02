@@ -1,10 +1,11 @@
-print("test1")
 stats.df.16.18 <- readRDS("data/shooting.16.18.rds")
 league.average.17.18 <- readRDS("data/league.average.17.18.rds")
 adv.average.17.18 <- readRDS("data/adv.average.17.18.rds")
 cols <- c(22,8,28,4,24,5,25,43,44)
 names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
            "USG 16-17", "USG 17-18", "TS Change", "USG Change")
+all.plays.2016 <- readRDS("data/plays.2016.rds")
+all.plays.2017 <- readRDS("data/plays.2017.rds")
 
 player_yoy <- function(player,ref="self") {
     layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
@@ -78,3 +79,32 @@ display <- function() {
     return(df)
 }
 
+plot_plays <- function(name) {
+    layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(6, 1))
+    par(mai=c(0.5,0.5,1.0,0.25))
+    stats.16 <- all.plays.2016[all.plays.2016$fullName == name,]
+    stats.17 <- all.plays.2017[all.plays.2017$fullName == name,]
+    perc <- rbind("2016"=as.numeric(stats.16[,grepl("Time",names(stats.16))]),
+                  "2017"=as.numeric(stats.17[,grepl("Time",names(stats.17))]))
+    colnames(perc) <- play.types
+    order <- names(sort(perc[2,],decreasing=TRUE))
+    perc <- perc[,order]
+    perc[1,] <- as.numeric(perc[1,])
+    perc[2,] <- as.numeric(perc[2,])
+    barplot(perc[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
+    box()
+    ppp <- rbind("2016"=as.numeric(stats.16[,grepl("PPP",names(stats.16))]),
+                  "2017"=as.numeric(stats.17[,grepl("PPP",names(stats.17))]))
+    colnames(ppp) <- play.types
+    ppp <- ppp[,order]
+    ppp[1,] <- as.numeric(ppp[1,])
+    ppp[2,] <- as.numeric(ppp[2,])
+    barplot(ppp[,perc[2,]>5],beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
+    box()
+    par(mai=c(0,0,0,0))
+    plot.new()
+    legend(x="center", ncol=2, legend=c("2016-17","2017-18"),
+           col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(4,4), cex=1)
+}
