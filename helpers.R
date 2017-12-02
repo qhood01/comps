@@ -6,6 +6,8 @@ names <- c("Name", "Minutes 16-17", "Minutes 17-18", "TS 16-17", "TS 17-18",
            "USG 16-17", "USG 17-18", "TS Change", "USG Change")
 all.plays.2016 <- readRDS("data/plays.2016.rds")
 all.plays.2017 <- readRDS("data/plays.2017.rds")
+play.types <- c("transition", "isolation", "prhandler", "prroll", "postup", "spotup",
+                "handoff", "cut", "offscreen", "putback", "misc")
 
 player_yoy <- function(player,ref="self") {
     layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
