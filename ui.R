@@ -18,7 +18,9 @@ bootstrapPage(
         column(12, align="center",
                radioButtons("var2",
                             label="Choose a reference",
-                            choices = c("League Average","Player's Previous Year")))
+                            choices = c("League Average",
+                                        "Player's Previous Year",
+                                        "Positional Median")))
     ),
     fluidRow(
         column(12, align="center",

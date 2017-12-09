@@ -8,22 +8,57 @@ all.plays.2016 <- readRDS("data/plays.2016.rds")
 all.plays.2017 <- readRDS("data/plays.2017.rds")
 play.types <- c("transition", "isolation", "prhandler", "prroll", "postup", "spotup",
                 "handoff", "cut", "offscreen", "putback", "misc")
+stats.min <- stats.df.16.18[which(stats.df.16.18$MP.y >= quantile(stats.df.16.18$MP.y,
+                                                                  c(.1))),]
+med.0.3.perc <- aggregate(stats.min[,'0.3.perc.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+med.3.10.perc <- aggregate(stats.min[,'3.10.perc.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+med.10.16.perc <- aggregate(stats.min[,'10.16.perc.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+med.16.3.perc <- aggregate(stats.min[,'16.3.perc.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+med.3.perc <- aggregate(stats.min[,'3.perc.y'],by=list(stats.min$Pos.y),median,
+                        na.rm=TRUE)
+med.perc <- cbind(med.0.3.perc,med.3.10.perc[,-1],med.10.16.perc[,-1],
+                  med.16.3.perc[,-1],med.3.perc[,-1])
+names(med.perc) <- c("Pos","0.3","3.10","10.16","16.3","3")
+
+perc.med.0.3 <- aggregate(stats.min[,'perc.0.3.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+perc.med.3.10 <- aggregate(stats.min[,'perc.3.10.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+perc.med.10.16 <- aggregate(stats.min[,'perc.10.16.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+perc.med.16.3 <- aggregate(stats.min[,'perc.16.3.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+perc.med.3 <- aggregate(stats.min[,'perc.3.y'],by=list(stats.min$Pos.y),median,
+                     na.rm=TRUE)
+perc.med <- cbind(perc.med.0.3,perc.med.3.10[,-1],perc.med.10.16[,-1],
+                  perc.med.16.3[,-1],perc.med.3[,-1])
+names(perc.med) <- c("Pos","0.3","3.10","10.16","16.3","3")
 
 player_yoy <- function(player,ref="self") {
     layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
     par(mai=c(0.5,0.5,1.0,0.25))
     cols.16.17 <- c(4,5,10,9)
     cols.17.18 <- c(24,25,30,29)
+    pos <- stats.df.16.18[stats.df.16.18$Player.y == player,"Pos.y"]
     if (ref == "self") {
         adv.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.16.17])
         s.perc.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,16:20])
         perc.s.1 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,11:15])
         leg <- c("2016-17", "2017-18")
-    } else {
+    } else if (ref == "league") {
         adv.1 <- adv.average.17.18
         s.perc.1 <- as.numeric(league.average.17.18[1,])
         perc.s.1 <- as.numeric(league.average.17.18[2,])
         leg <- c("2017-18 League Avg.", paste0("2017-18 ", player))
+    } else {
+        adv.1 <- adv.average.17.18
+        s.perc.1 <- as.numeric(med.perc[med.perc$Pos == pos,2:6])
+        perc.s.1 <- as.numeric(perc.med[perc.med$Pos == pos,2:6])
+        leg <- c(paste0("2017-18 ", pos, " Median"), paste0("2017-18 ", player))
     }
     adv.2 <- as.numeric(stats.df.16.18[stats.df.16.18$Player.y == player,cols.17.18])
     adv <- t(data.frame(adv.1,adv.2))

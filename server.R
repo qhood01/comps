@@ -6,6 +6,8 @@ shinyServer(function(input, output) {
         reference = "self"
         if (input$var2 == "League Average") {
             reference = "league"
+        } else if (input$var2 == "Positional Median")  {
+            reference = "position"
         }
         player_yoy(player=input$var1,ref=reference)
     })
