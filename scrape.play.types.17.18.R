@@ -132,6 +132,9 @@ for (p in play.types) {
 all.plays.2016[is.na(all.plays.2016)] <- 0
 all.plays.2017[is.na(all.plays.2017)] <- 0
 
+saveRDS(all.plays.2016,"./Data/plays.2016.rds")
+saveRDS(all.plays.2017,"./Data/plays.2017.rds")
+
 plot_plays <- function(name) {
     layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(6, 1))
     par(mai=c(0.5,0.5,1.0,0.25))
