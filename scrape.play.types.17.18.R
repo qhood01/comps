@@ -55,7 +55,7 @@ misc.data.2016 <- fromJSON(misc.url.2016)[[2]]
 misc.data.2016$fullName <- paste(misc.data.2016$PlayerFirstName,
                             misc.data.2016$PlayerLastName,sep=" ")
 
-transition.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2017&seasonType=Reg"
+transition.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Transition&limit=500&names=offensive&q=2518943&season=2017&seasonType=Reg"
 transition.data.2017 <- fromJSON(transition.url.2017)[[2]]
 transition.data.2017$fullName <- paste(transition.data.2017$PlayerFirstName,
                                   transition.data.2017$PlayerLastName,sep=" ")
