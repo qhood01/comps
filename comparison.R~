@@ -1,0 +1,104 @@
+plays <- readRDS("~/Documents/nbaShootingViz/data/plays.2017.rds")
+
+shooting <- readRDS("~/Downloads/shooting.16.18.rds")
+
+playerPlayComps <- list()
+timeCols <- names(plays)[grepl("Time",names(plays))]
+for (p1 in plays$fullName) {
+    print(p1)
+    compDF <- data.frame("Name"=rep(NA,5),"Score"=rep(NA,5))
+    for (p2 in plays$fullName[which(plays$fullName != p1)]) {
+        sumDiff <- 0
+        for (col in timeCols) {
+            p1Col <- plays[plays$fullName == p1,col]
+            p2Col <- plays[plays$fullName == p2,col]
+            colDiff <- abs(p1Col - p2Col)
+            sumDiff <- sumDiff+colDiff
+        }
+        if (length(which(is.na(compDF$Name))) == 0) {
+            ## comparisons are full, check minimum
+            max <- max(compDF$Score)
+            ## if minimum is greater than new difference, add new difference
+            ## else, do nothing
+            if (max > sumDiff) {
+                compDF$Name[which(compDF$Score == max)] <- p2
+                compDF$Score[which(compDF$Score == max)] <- sumDiff
+            }
+        } else {
+            ## comparisons are not full, enter at next available spot
+            ## index is first empty row
+            index <- which(is.na(compDF$Name))[1]
+            compDF[index,"Name"] <- p2
+            compDF[index,"Score"] <- sumDiff
+        }
+    }
+    compDF <- compDF[order(compDF$Score),]
+    playerPlayComps[[p1]] <- compDF
+}
+
+shootingCols <- c("Player.y","perc.0.3.y","perc.3.10.y","perc.10.16.y","perc.16.3.y","perc.3.y")
+shooting18 <- shooting[,shootingCols]
+names(shooting18) <- gsub("[.]y","",names(shooting18))
+playerShootingComps <- list()
+for (p1 in shooting18$Player) {
+    print(p1)
+    compDF <- data.frame("Name"=rep(NA,5),"Score"=rep(NA,5))
+    for (p2 in shooting18$Player[which(shooting18$Player != p1)]) {
+        sumDiff <- sum(abs(shooting18[shooting18$Player == p1,-1] - shooting18[shooting18$Player == p2,-1]))
+        if (length(which(is.na(compDF$Name))) == 0) {
+            ## comparisons are full, check minimum
+            max <- max(compDF$Score)
+            ## if minimum is greater than new difference, add new difference
+            ## else, do nothing
+            if (max > sumDiff) {
+                compDF$Name[which(compDF$Score == max)] <- p2
+                compDF$Score[which(compDF$Score == max)] <- sumDiff
+            }
+        } else {
+            ## comparisons are not full, enter at next available spot
+            ## index is first empty row
+            index <- which(is.na(compDF$Name))[1]
+            compDF[index,"Name"] <- p2
+            compDF[index,"Score"] <- sumDiff
+        }
+    }
+    compDF <- compDF[order(compDF$Score),]
+    playerShootingComps[[p1]] <- compDF
+}
+
+play.types <- c("transition", "isolation", "prhandler", "prroll", "postup", "spotup",
+                "handoff", "cut", "offscreen", "putback", "misc")
+compare_players <- function(name1,name2) {
+    layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(5, 1))
+    par(mai=c(0.5,0.5,1.0,0.25))
+    stats.1 <- plays[plays$fullName == name1,]
+    stats.2 <- plays[plays$fullName == name2,]
+    perc <- rbind(as.numeric(stats.1[,grepl("Time",names(stats.1))]),
+                  as.numeric(stats.2[,grepl("Time",names(stats.2))]))
+    colnames(perc) <- play.types
+    rownames(perc) <- c(name1,name2)
+    colOrder <- order(perc[1,],decreasing=TRUE)
+    perc <- perc[,colOrder]
+    perc[1,] <- as.numeric(perc[1,])
+    perc[2,] <- as.numeric(perc[2,])
+    barplot(perc[,perc[1,]>5|perc[2,]>5],
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Percentage of Possessions by Play Type")
+    box()
+    ppp <- rbind(as.numeric(stats.1[,grepl("PPP",names(stats.1))]),
+                 as.numeric(stats.2[,grepl("PPP",names(stats.2))]))
+    colnames(ppp) <- play.types
+    rownames(ppp) <- c(name1,name2)
+    ppp <- ppp[,colOrder]
+    ppp[1,] <- as.numeric(ppp[1,])
+    ppp[2,] <- as.numeric(ppp[2,])
+    print(ppp)
+    barplot(ppp[,perc[1,]>5|perc[2,]>5],
+            beside=TRUE,las=2,col=c('#e41a1c','#377eb8'),
+            main="Points per Possession by Play Type")
+    box()
+    par(mai=c(0,0,0,0))
+    plot.new()
+    legend(x="center", ncol=2, legend=c(name1,name2),
+           col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(4,4), cex=1)
+}
