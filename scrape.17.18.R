@@ -1,0 +1,272 @@
+library(rvest)
+library(magrittr)
+library(XML)
+library(jsonlite)
+
+stats.df.16.17 <- readRDS("./data/shooting.16.17.rds")
+
+# 2017-18
+url.17.18 <- "https://www.basketball-reference.com/leagues/NBA_2018_advanced.html"
+webpage.17.18 <- read_html(url.17.18)
+players.advanced.17.18 <- webpage.17.18 %>% html_nodes("table") %>% html_table %>% as.data.frame()
+
+players.advanced.17.18 <- players.advanced.17.18[players.advanced.17.18$Player != "Player",]
+players.advanced.17.18 <- players.advanced.17.18[!duplicated(players.advanced.17.18$Player),]
+players.advanced.17.18$Pos[which(players.advanced.17.18$Pos == "PF-C")] <- "C"
+
+player.html.17.18 <- webpage.17.18 %>% html_nodes("table") %>% html_nodes("tr") %>% html_nodes("td") %>% html_nodes("a")
+player.html.unique.17.18 <- unique(player.html.17.18)
+player.dictionary.17.18 <- as.character(player.html.17.18)
+player.dictionary.17.18 <- unique(player.dictionary.17.18[grepl("players",player.dictionary.17.18)])
+player.names.17.18 <- unlist(lapply(player.dictionary.17.18, function(x) unlist(strsplit(x,">"))[2]))
+player.names.17.18 <- unlist(lapply(player.names.17.18, function(x) substr(x,1,nchar(x)-3)))
+
+player.ids.17.18 <- unlist(lapply(player.dictionary.17.18, function(x) unlist(strsplit(x,"/"))[4]))
+player.ids.17.18 <- unlist(lapply(player.ids.17.18, function(x) unlist(strsplit(x,"[.]"))[1]))
+
+players.17.18 <- data.frame(player.names.17.18, player.ids.17.18)
+players.17.18$player.ids <- as.character(players.17.18$player.ids)
+
+player.urls.17.18 <- paste0("https://www.basketball-reference.com/players/",
+                     substr(player.ids.17.18,1,1), "/",
+                     player.ids.17.18,
+                     ".html")
+
+
+# 2017-18
+for (url in player.urls.17.18) {
+    print(url)
+    h <- read_html(url)
+    totals <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
+        html_text() %>%    # extract comment text
+        paste(collapse = '') %>%    # collapse to a single string
+        read_html() %>%    # reparse to HTML
+        html_node('table#totals') %>%    # select the desired table
+        html_table()
+    shots <- totals[totals$Season == "2017-18",c("FGA")][1]
+    if (shots > 10 | is.na(shots)) {
+        advanced <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
+            html_text() %>%    # extract comment text
+            paste(collapse = '') %>%    # collapse to a single string
+            read_html() %>%    # reparse to HTML
+            html_node('table#advanced') %>%    # select the desired table
+             html_table()
+        shooting <- h %>% html_nodes(xpath = '//comment()') %>%    # select comment nodes
+            html_text() %>%    # extract comment text
+            paste(collapse = '') %>%    # collapse to a single string
+            read_html() %>%    # reparse to HTML
+            html_node('table#shooting') %>%    # select the desired table
+            html_table()
+        ftp.17.18.games.minutes <- totals[totals$Season == "2017-18",c("G","MP","FT%")][1,]
+        ftr.17.18 <- advanced[advanced$Season == "2017-18",c("FTr")][1]
+        shooting.17.18 <- shooting[shooting[,1] == "2017-18",c(11:15,17:21)][1,]
+        colnames(shooting.17.18) <- c("perc.0.3","perc.3.10","perc.10.16","perc.16.3","perc.3",
+                                      "0.3.perc","3.10.perc","10.16.perc","16.3.perc","3.perc")
+        stats <- cbind(url,ftp.17.18.games.minutes,ftr.17.18,shooting.17.18)
+        if(!exists("locations.df.17.18")) {
+            locations.df.17.18 <- stats
+        } else {
+            locations.df.17.18 <- rbind(locations.df.17.18,stats)
+        }
+    } else {
+        next
+    }
+}
+
+# 2017-18
+locations.df.17.18$url <- as.character(locations.df.17.18$url)
+locations.df.17.18$player.id <- substr(locations.df.17.18$url,48,nchar(locations.df.17.18$url)-5)
+locations.df.17.18 <- merge(locations.df.17.18, players.17.18, by.x="player.id", by.y="player.ids")
+
+stats.df.17.18 <- merge(players.advanced.17.18[,c("Player","Pos","TS.","USG.")],locations.df.17.18,by.x="Player",by.y="player.names.17.18")
+
+for (i in c(3:4,7:20)) {
+    stats.df.17.18[,i] <- as.numeric(stats.df.17.18[,i])
+}
+
+# Merge years
+stats.df.16.18 <- merge(stats.df.16.17,stats.df.17.18,by="player.id",all.y=TRUE)
+
+stats.df.16.18$inc.ts.usg <- ifelse((stats.df.16.18$TS..y > stats.df.16.18$TS..x) &
+                                    (stats.df.16.18$USG..y > stats.df.16.18$USG..x),1,0)
+stats.df.16.18$diff.ts <- as.numeric(stats.df.16.18$TS..y) - as.numeric(stats.df.16.18$TS..x)
+stats.df.16.18$diff.usg <- as.numeric(stats.df.16.18$USG..y) - as.numeric(stats.df.16.18$USG..x)
+
+inc.ts.usg <- stats.df.16.18[stats.df.16.18$inc.ts.usg == 1,]
+
+# Save Data-Frame
+saveRDS(stats.df.16.18, "./data/shooting.16.18.rds")
+
+url.league.shooting <- "https://www.basketball-reference.com/leagues/NBA_2018.html"
+webpage.league <- read_html(url.league.shooting)
+
+league.shooting <- webpage.league %>%
+                   html_nodes(xpath = '//comment()') %>%    # select comment nodes
+                   html_text() %>%    # extract comment text
+                   paste(collapse = '') %>%    # collapse to a single string
+                   read_html() %>%    # reparse to HTML
+                   html_node('table#team_shooting') %>%    # select the desired table
+                   html_table()
+
+league.average.shooting <- league.shooting[c(1:2,33),]
+s.perc <- league.average.shooting[3,14:18]
+perc.s <- league.average.shooting[3,8:12]
+league.perc <- rbind(s.perc,perc.s)
+names(league.perc) <- c("0-3","3-10","10-16","16<3","3P")
+rownames(league.perc) <- c("s.perc","perc.s")
+
+saveRDS(league.perc, "./data/league.average.17.18.rds")
+
+league.misc <- webpage.league %>%
+                   html_nodes(xpath = '//comment()') %>%    # select comment nodes
+                   html_text() %>%    # extract comment text
+                   paste(collapse = '') %>%    # collapse to a single string
+                   read_html() %>%    # reparse to HTML
+                   html_node('table#misc_stats') %>%    # select the desired table
+                   html_table()
+league.totals <- webpage.league %>%
+                   html_nodes(xpath = '//comment()') %>%    # select comment nodes
+                   html_text() %>%    # extract comment text
+                   paste(collapse = '') %>%    # collapse to a single string
+                   read_html() %>%    # reparse to HTML
+                   html_node('table#team-stats-base') %>%    # select the desired table
+                   html_table()
+league.adv <- c(as.numeric(league.misc[32,16]),20,as.numeric(league.misc[32,14]),
+                as.numeric(league.totals[31,"FT%"]))
+
+saveRDS(league.adv, "./data/adv.average.17.18.rds")
+
+# Play Types
+
+transition.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2016&seasonType=Reg"
+transition.data.2016 <- fromJSON(transition.url.2016)[[2]]
+transition.data.2016$fullName <- paste(transition.data.2016$PlayerFirstName,
+                                  transition.data.2016$PlayerLastName,sep=" ")
+
+isolation.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2016&seasonType=Reg"
+isolation.data.2016 <- fromJSON(isolation.url.2016)[[2]]
+isolation.data.2016$fullName <- paste(isolation.data.2016$PlayerFirstName,
+                                 isolation.data.2016$PlayerLastName,sep=" ")
+
+prhandler.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=PRBallHandler&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+prhandler.data.2016 <- fromJSON(prhandler.url.2016)[[2]]
+prhandler.data.2016$fullName <- paste(prhandler.data.2016$PlayerFirstName,
+                                 prhandler.data.2016$PlayerLastName,sep=" ")
+
+prroll.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=PRRollman&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+prroll.data.2016 <- fromJSON(prroll.url.2016)[[2]]
+prroll.data.2016$fullName <- paste(prroll.data.2016$PlayerFirstName,
+                              prroll.data.2016$PlayerLastName,sep=" ")
+
+postup.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Postup&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+postup.data.2016 <- fromJSON(postup.url.2016)[[2]]
+postup.data.2016$fullName <- paste(postup.data.2016$PlayerFirstName,
+                              postup.data.2016$PlayerLastName,sep=" ")
+
+spotup.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Spotup&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+spotup.data.2016 <- fromJSON(spotup.url.2016)[[2]]
+spotup.data.2016$fullName <- paste(spotup.data.2016$PlayerFirstName,
+                              spotup.data.2016$PlayerLastName,sep=" ")
+
+handoff.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Handoff&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+handoff.data.2016 <- fromJSON(handoff.url.2016)[[2]]
+handoff.data.2016$fullName <- paste(handoff.data.2016$PlayerFirstName,
+                               handoff.data.2016$PlayerLastName,sep=" ")
+
+cut.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Cut&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+cut.data.2016 <- fromJSON(cut.url.2016)[[2]]
+cut.data.2016$fullName <- paste(cut.data.2016$PlayerFirstName,
+                           cut.data.2016$PlayerLastName,sep=" ")
+
+offscreen.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Offscreen&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+offscreen.data.2016 <- fromJSON(offscreen.url.2016)[[2]]
+offscreen.data.2016$fullName <- paste(offscreen.data.2016$PlayerFirstName,
+                                 offscreen.data.2016$PlayerLastName,sep=" ")
+
+putback.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=OffRebound&limit=500&names=offensive&q=2518947&season=2016&seasonType=Reg"
+putback.data.2016 <- fromJSON(putback.url.2016)[[2]]
+putback.data.2016$fullName <- paste(putback.data.2016$PlayerFirstName,
+                               putback.data.2016$PlayerLastName,sep=" ")
+
+misc.url.2016 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Misc&limit=500&names=offensive&q=2518946&season=2016&seasonType=Reg"
+misc.data.2016 <- fromJSON(misc.url.2016)[[2]]
+misc.data.2016$fullName <- paste(misc.data.2016$PlayerFirstName,
+                            misc.data.2016$PlayerLastName,sep=" ")
+
+transition.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2017&seasonType=Reg"
+transition.data.2017 <- fromJSON(transition.url.2017)[[2]]
+transition.data.2017$fullName <- paste(transition.data.2017$PlayerFirstName,
+                                  transition.data.2017$PlayerLastName,sep=" ")
+
+isolation.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Isolation&limit=500&names=offensive&q=2518943&season=2017&seasonType=Reg"
+isolation.data.2017 <- fromJSON(isolation.url.2017)[[2]]
+isolation.data.2017$fullName <- paste(isolation.data.2017$PlayerFirstName,
+                                 isolation.data.2017$PlayerLastName,sep=" ")
+
+prhandler.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=PRBallHandler&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+prhandler.data.2017 <- fromJSON(prhandler.url.2017)[[2]]
+prhandler.data.2017$fullName <- paste(prhandler.data.2017$PlayerFirstName,
+                                 prhandler.data.2017$PlayerLastName,sep=" ")
+
+prroll.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=PRRollman&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+prroll.data.2017 <- fromJSON(prroll.url.2017)[[2]]
+prroll.data.2017$fullName <- paste(prroll.data.2017$PlayerFirstName,
+                              prroll.data.2017$PlayerLastName,sep=" ")
+
+postup.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Postup&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+postup.data.2017 <- fromJSON(postup.url.2017)[[2]]
+postup.data.2017$fullName <- paste(postup.data.2017$PlayerFirstName,
+                              postup.data.2017$PlayerLastName,sep=" ")
+
+spotup.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Spotup&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+spotup.data.2017 <- fromJSON(spotup.url.2017)[[2]]
+spotup.data.2017$fullName <- paste(spotup.data.2017$PlayerFirstName,
+                              spotup.data.2017$PlayerLastName,sep=" ")
+
+handoff.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Handoff&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+handoff.data.2017 <- fromJSON(handoff.url.2017)[[2]]
+handoff.data.2017$fullName <- paste(handoff.data.2017$PlayerFirstName,
+                               handoff.data.2017$PlayerLastName,sep=" ")
+
+cut.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Cut&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+cut.data.2017 <- fromJSON(cut.url.2017)[[2]]
+cut.data.2017$fullName <- paste(cut.data.2017$PlayerFirstName,
+                           cut.data.2017$PlayerLastName,sep=" ")
+
+offscreen.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Offscreen&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+offscreen.data.2017 <- fromJSON(offscreen.url.2017)[[2]]
+offscreen.data.2017$fullName <- paste(offscreen.data.2017$PlayerFirstName,
+                                 offscreen.data.2017$PlayerLastName,sep=" ")
+
+putback.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=OffRebound&limit=500&names=offensive&q=2518947&season=2017&seasonType=Reg"
+putback.data.2017 <- fromJSON(putback.url.2017)[[2]]
+putback.data.2017$fullName <- paste(putback.data.2017$PlayerFirstName,
+                               putback.data.2017$PlayerLastName,sep=" ")
+
+misc.url.2017 <- "https://stats-prod.nba.com/wp-json/statscms/v1/synergy/player/?category=Misc&limit=500&names=offensive&q=2518946&season=2017&seasonType=Reg"
+misc.data.2017 <- fromJSON(misc.url.2017)[[2]]
+misc.data.2017$fullName <- paste(misc.data.2017$PlayerFirstName,
+                            misc.data.2017$PlayerLastName,sep=" ")
+
+play.types <- c("transition", "isolation", "prhandler", "prroll", "postup", "spotup",
+                "handoff", "cut", "offscreen", "putback", "misc")
+for (p in play.types) {
+    name.2016 <- paste0(p,".data.2016")
+    p.df.2016 <- eval(parse(text=name.2016))[,c("fullName", "Poss", "PPP", "Time")]
+    names(p.df.2016)[2:4] <- paste0(p,names(p.df.2016[2:4]))
+    name.2017 <- paste0(p,".data.2017")
+    p.df.2017 <- eval(parse(text=name.2017))[,c("fullName", "Poss", "PPP", "Time")]
+    names(p.df.2017)[2:4] <- paste0(p,names(p.df.2017[2:4]))
+    if (!exists("all.plays.2016")) {
+        all.plays.2016 <- p.df.2016
+        all.plays.2017 <- p.df.2017
+    } else {
+        all.plays.2016 <- merge(all.plays.2016, p.df.2016, all=TRUE, by="fullName")
+        all.plays.2017 <- merge(all.plays.2017, p.df.2017, all=TRUE, by="fullName")
+    }
+}
+all.plays.2016[is.na(all.plays.2016)] <- 0
+all.plays.2017[is.na(all.plays.2017)] <- 0
+
+saveRDS(all.plays.2016,"./Data/plays.2016.rds")
+saveRDS(all.plays.2017,"./Data/plays.2017.rds")
