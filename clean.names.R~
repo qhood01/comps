@@ -1,17 +1,38 @@
-plays <- readRDS("./data/plays.2017.18.rds")
-stats <- readRDS("./data/stats.2017.18.rds")
+plays <- readRDS("./data/plays.2017.rds")
 playerComps <- readRDS("./data/comparison.rds")
+stats <- readRDS("./data/shooting.16.18.rds")
+
+statsCols <- c("Player.y","TS..y","USG..y","FT%.y","ftr.17.18","perc.0.3.y","perc.3.10.y","perc.10.16.y","perc.16.3.y","perc.3.y","0.3.perc.y","3.10.perc.y","10.16.perc.y","16.3.perc.y","3.perc.y")
+stats18 <- stats[,statsCols]
+names(stats18) <- gsub("[.]y","",names(stats18))
+
+## Remove double spaces
+plays$fullName <- gsub("  "," ",plays$fullName)
+
+plays$fullName <- gsub("CJ","C.J.",plays$fullName)
+plays$fullName <- gsub("PJ","P.J.",plays$fullName)
+plays$fullName <- gsub("JJ","J.J.",plays$fullName)
+plays$fullName <- gsub("TJ","T.J.",plays$fullName)
+plays$fullName <- gsub("JR","J.R.",plays$fullName)
+plays$fullName <- gsub("DJ","D.J.",plays$fullName)
+plays$fullName <- gsub("Al Farouq","Al-Farouq",plays$fullName)
+
+jrs <- c("Dennis Smith", "Derrick Jones", "Kelly Oubre", "Otto Porter", "Tim Hardaway")
+stats18$Player[which(stats18$Player %in% jrs)] <- paste0(jrs, " Jr.")
+
+IIIs <- c("Glenn Robinson", "James Webb", "Johnny O'Bryant", "Terry Rozier")
+stats18$Player[which(stats18$Player %in% IIIs)] <- paste0(IIIs, " III")
 
 play.types <- c("transition", "isolation", "prhandler", "prroll", "postup", "spotup",
                 "handoff", "cut", "offscreen", "putback", "misc")
 
 compare_stats <- function(name1,name2) {
-    layout(matrix(c(1,2,3), ncol=3, byrow=TRUE))
-    par(mai=c(0.75,0.5,0.75,0.25))
+    layout(matrix(c(1,2,3,4,4,4), ncol=3, byrow=TRUE), heights=c(6, 1))
+    par(mai=c(0.5,0.5,1.0,0.25))
 
-    advCols <- c("TS.","USG.","ftr.17.18","FT%")
-    ppsCols <- c("0.3.perc","3.10.perc","10.16.perc","16.3.perc","3.perc")
-    percCols <- c("perc.0.3","perc.3.10","perc.10.16","perc.16.3","perc.3")
+    advCols <- c(2,3,5,4)
+    ppsCols <- 11:15
+    percCols <- 6:10
 
     adv.1 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name1),advCols])
     s.perc.1 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name1),ppsCols])
@@ -57,19 +78,20 @@ compare_stats <- function(name1,name2) {
     mtext("Percent of Shots by Location",side=3,line=1,cex=1.5)
     box()
     par(mai=c(0,0,0,0))
-    ##plot.new()
-    ## legend(x="center", ncol=2, legend=c(name1,name2),
-    ##        col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(7,7), cex=2)
+    plot.new()
+    legend(x="center", ncol=2, legend=c(name1,name2),
+           col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(7,7), cex=2)
 }
 
 compare_plays <- function(name1,name2) {
     layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(5, 1))
-    par(mai=c(0.75,0.5,1.0,0.25))
+    par(mai=c(0.5,0.5,1.0,0.25))
     stats.1 <- plays[tolower(plays$fullName) == tolower(name1),]
     stats.2 <- plays[tolower(plays$fullName) == tolower(name2),]
     perc <- rbind(as.numeric(stats.1[,grepl("Time",names(stats.1))]),
                   as.numeric(stats.2[,grepl("Time",names(stats.2))]))
     colnames(perc) <- play.types
+    print(perc)
     ##rownames(perc) <- c(name1,name2)
     colOrder <- order(perc[1,],decreasing=TRUE)
     perc <- perc[,colOrder]
@@ -93,5 +115,5 @@ compare_plays <- function(name1,name2) {
     par(mai=c(0,0,0,0))
     plot.new()
     legend(x="center", ncol=2, legend=c(name1,name2),
-           col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(7,7), cex=1.5)
+           col=c('#e41a1c','#377eb8'), lty=c(1,1), lwd=c(4,4), cex=1)
 }

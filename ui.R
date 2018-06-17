@@ -1,10 +1,10 @@
-plays <- readRDS("./data/plays.2017.rds")
+plays <- readRDS("./data/plays.2017.18.rds")
 players <- sort(plays$fullName)
 
 bootstrapPage(
     fluidRow(
         column(12, align="center",
-               titlePanel("Player Shot Profile"))
+               titlePanel("Player Play Type Comparison"))
     ),
     fluidRow(
         column(12, align="center",

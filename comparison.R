@@ -1,5 +1,5 @@
 library(rlist)
-plays <- readRDS("~/Documents/Comparison/data/plays.2017.rds")
+plays <- readRDS("./data/plays.2017.18.rds")[-229,]
 
 playerPlayComps <- list()
 timeCols <- names(plays)[grepl("Time",names(plays))]
@@ -19,7 +19,7 @@ for (p1 in plays$fullName) {
     compDF <- compDF[order(compDF$Score),]
     playerPlayComps[[p1]] <- compDF
 }
-list.save(playerPlayComps,"~/Documents/Comparison/data/comparison.rds")
+list.save(playerPlayComps,"./data/comparison.rds")
 
 ## shootingCols <- c("Player.y","perc.0.3.y","perc.3.10.y","perc.10.16.y","perc.16.3.y","perc.3.y")
 ## shooting18 <- shooting[,shootingCols]
