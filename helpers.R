@@ -13,11 +13,11 @@ compare_stats <- function(name1,name2) {
     ppsCols <- c("0.3.perc","3.10.perc","10.16.perc","16.3.perc","3.perc")
     percCols <- c("perc.0.3","perc.3.10","perc.10.16","perc.16.3","perc.3")
 
-    adv.1 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name1),advCols])
-    s.perc.1 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name1),ppsCols])
-    perc.s.1 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name1),percCols])
+    adv.1 <- as.numeric(stats[tolower(stats$Player) == tolower(name1),advCols])
+    s.perc.1 <- as.numeric(stats[tolower(stats$Player) == tolower(name1),ppsCols])
+    perc.s.1 <- as.numeric(stats[tolower(stats$Player) == tolower(name1),percCols])
 
-    adv.2 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name2),advCols])
+    adv.2 <- as.numeric(stats[tolower(stats$Player) == tolower(name2),advCols])
     adv <- t(data.frame(adv.1,adv.2))
     adv[,c(1,3,4)] <- 100*adv[,c(1,3,4)]
     adv[is.na(adv)] <- 0
@@ -29,7 +29,7 @@ compare_stats <- function(name1,name2) {
     mtext("Advanced Stats",side=3,line=1,cex=1.5)
     box()
     league.pps <- 1.028
-    s.perc.2 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name2),ppsCols])
+    s.perc.2 <- as.numeric(stats[tolower(stats$Player) == tolower(name2),ppsCols])
     s.perc <- t(data.frame(s.perc.1,s.perc.2))
     pps <- cbind(2*s.perc[,1:4],3*s.perc[,5])
     pps <- pps
@@ -44,7 +44,7 @@ compare_stats <- function(name1,name2) {
     mtext("Points Per Shot by Location",side=3,line=1,cex=1.5)
     #abline(h=1.028,col='Black',lty=2,lwd=2)
     box()
-    perc.s.2 <- as.numeric(stats18[tolower(stats18$Player) == tolower(name2),percCols])
+    perc.s.2 <- as.numeric(stats[tolower(stats$Player) == tolower(name2),percCols])
     perc.s <- t(data.frame(perc.s.1,perc.s.2))*100
     perc.s[is.na(perc.s)] <- 0
     ylim <- max(perc.s)*1.1
